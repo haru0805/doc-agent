@@ -1,0 +1,226 @@
+{
+  "name": "Daily Note PM Digest to Notion (Ollama)",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "cronExpression",
+              "expression": "0 6 * * *"
+            }
+          ]
+        },
+        "timezone": "Asia/Tokyo"
+      },
+      "id": "1",
+      "name": "Daily 06:00 JST",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        220,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "url": "https://note.com/hashtag/PM/rss",
+        "options": {
+          "ignoreSSLIssues": false
+        }
+      },
+      "id": "2",
+      "name": "Read RSS",
+      "type": "n8n-nodes-base.rssFeedRead",
+      "typeVersion": 1.1,
+      "position": [
+        460,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const toJstDate = (d) => new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Tokyo', year: 'numeric', month: '2-digit', day: '2-digit' }).format(d);\n\nconst now = new Date();\nconst nowJstDateStr = toJstDate(now);\nconst [year, month, day] = nowJstDateStr.split('-').map(Number);\nconst todayJstUtc = new Date(Date.UTC(year, month - 1, day));\ntodayJstUtc.setUTCDate(todayJstUtc.getUTCDate() - 1);\nconst yesterdayStr = toJstDate(todayJstUtc);\n\nconst output = [];\nfor (const item of items) {\n  const j = item.json || {};\n  const candidateDate = j.isoDate || j.pubDate || j.updated || j.published || j['dc:date'];\n  if (!candidateDate) continue;\n\n  const dateObj = new Date(candidateDate);\n  if (Number.isNaN(dateObj.getTime())) continue;\n\n  const updatedDateStr = toJstDate(dateObj);\n\n  const categoriesRaw = j.categories ?? j.category ?? [];\n  const categories = Array.isArray(categoriesRaw) ? categoriesRaw : [categoriesRaw];\n  const hasPMTag = categories.some((c) => String(c).trim().toLowerCase() === 'pm');\n\n  if (hasPMTag && updatedDateStr === yesterdayStr) {\n    output.push({\n      json: {\n        ...j,\n        updatedDateJst: updatedDateStr,\n        matchedTag: 'PM'\n      }\n    });\n  }\n}\n\nreturn output;"
+      },
+      "id": "3",
+      "name": "Filter PM + Yesterday",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        700,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "name": "ollamaPrompt",
+              "value": "=あなたは日本語の要約アシスタントです。以下の記事を3-5行で要約してください。\\n\\nタイトル: {{$json.title}}\\nURL: {{$json.link}}\\n更新日(JST): {{$json.updatedDateJst}}\\n本文: {{$json['content:encoded'] || $json.content || $json.contentSnippet || $json.description || ''}}",
+              "type": "string"
+            },
+            {
+              "name": "articleTitle",
+              "value": "={{$json.title}}",
+              "type": "string"
+            },
+            {
+              "name": "articleUrl",
+              "value": "={{$json.link}}",
+              "type": "string"
+            },
+            {
+              "name": "updatedDateJst",
+              "value": "={{$json.updatedDateJst}}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "4",
+      "name": "Build Prompt",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        940,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://127.0.0.1:11434/api/generate",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"model\": \"gpt-oss:20b\",\n  \"prompt\": $json.ollamaPrompt,\n  \"stream\": false\n}",
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "id": "5",
+      "name": "Summarize with Ollama",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1180,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "resource": "databasePage",
+        "operation": "create",
+        "databaseId": "YOUR_NOTION_DATABASE_ID",
+        "title": "={{$node['Build Prompt'].json['articleTitle']}}",
+        "propertiesUi": {
+          "propertyValues": [
+            {
+              "key": "URL|url",
+              "urlValue": "={{$node['Build Prompt'].json['articleUrl']}}"
+            },
+            {
+              "key": "UpdatedDate|date",
+              "dateValue": "={{$node['Build Prompt'].json['updatedDateJst']}}"
+            },
+            {
+              "key": "Tag|multi_select",
+              "multiSelectValue": "PM"
+            },
+            {
+              "key": "Summary|rich_text",
+              "textContent": "={{$json.response}}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "6",
+      "name": "Save to Notion",
+      "type": "n8n-nodes-base.notion",
+      "typeVersion": 2.2,
+      "position": [
+        1420,
+        300
+      ],
+      "credentials": {
+        "notionApi": {
+          "id": "YOUR_NOTION_CREDENTIAL_ID",
+          "name": "Notion account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Daily 06:00 JST": {
+      "main": [
+        [
+          {
+            "node": "Read RSS",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read RSS": {
+      "main": [
+        [
+          {
+            "node": "Filter PM + Yesterday",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter PM + Yesterday": {
+      "main": [
+        [
+          {
+            "node": "Build Prompt",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build Prompt": {
+      "main": [
+        [
+          {
+            "node": "Summarize with Ollama",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Summarize with Ollama": {
+      "main": [
+        [
+          {
+            "node": "Save to Notion",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "1",
+  "meta": {
+    "instanceId": "generated-by-codex"
+  },
+  "id": "daily-note-pm-digest"
+}
