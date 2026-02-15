@@ -94,7 +94,7 @@
         "url": "http://127.0.0.1:11434/api/generate",
         "sendBody": true,
         "specifyBody": "json",
-        "jsonBody": "={\n  \"model\": \"gpt-oss:20b\",\n  \"prompt\": $json.ollamaPrompt,\n  \"stream\": false\n}",
+        "jsonBody": "={\n  \"model\": \"gpt-oss20B\",\n  \"prompt\": $json.ollamaPrompt,\n  \"stream\": false\n}",
         "options": {
           "response": {
             "response": {
