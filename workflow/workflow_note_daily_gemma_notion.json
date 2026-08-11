@@ -1,0 +1,253 @@
+{
+  "name": "Daily note Digest to Notion (Gemma)",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "cronExpression",
+              "expression": "0 6 * * *"
+            }
+          ]
+        },
+        "timezone": "Asia/Tokyo"
+      },
+      "id": "1",
+      "name": "Daily 06:00 JST",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        220,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const feeds = [\n  'https://note.com/kenichiota0711/rss',\n  'https://note.com/1105shimada/rss',\n  'https://note.com/polipoli_info/rss',\n  'https://note.com/hal_sk/rss',\n  'https://note.com/takashi_asa_wip/rss',\n  'https://note.com/jun0322/rss',\n  'https://note.com/inokun/rss',\n  'https://note.com/mosarinko/rss',\n  'https://note.com/miz_kushida/rss',\n  'https://note.com/yumaevo/rss',\n  'https://note.com/kenichiro_hara/rss',\n  'https://note.com/riku0423/rss',\n  'https://note.com/testosterone/rss',\n  'https://note.com/usakurai/rss',\n  'https://note.com/yamotty_note/rss',\n  'https://note.com/djkei0514/rss',\n  'https://note.com/annotakahiro24/rss',\n  'https://note.com/takahiroanno/rss',\n  'https://note.com/taiga_pkr/rss',\n  'https://note.com/777pee/rss',\n  'https://note.com/goole/rss',\n  'https://note.com/saydo/rss',\n  'https://note.com/mamoru_tsuchiya/rss',\n  'https://note.com/kan_hatakeyama/rss',\n  'https://note.com/npaka/rss',\n  'https://note.com/mmiya/rss',\n  'https://note.com/ihara/rss',\n  'https://note.com/digital_jpn_gc/rss',\n  'https://note.com/digital_jpn/rss',\n  'https://note.com/hik0107/rss',\n  'https://note.com/kouzoukaikaku/rss',\n  'https://note.com/simplearchitect/rss',\n  'https://note.com/gooddesignaward/rss',\n  'https://note.com/coffeee_student/rss',\n  'https://note.com/currypurin/rss',\n  'https://note.com/wakusei2nd/rss',\n  'https://note.com/keihigu/rss',\n  'https://note.com/vcca/rss',\n  'https://note.com/takenokosuzuki/rss',\n  'https://note.com/carpediem_/rss',\n  'https://note.com/dohijun/rss',\n  'https://note.com/copywriterseyes/rss',\n  'https://note.com/ai_1124at/rss',\n  'https://note.com/mcz9mm/rss',\n  'https://note.com/lifeisbeautiful/rss',\n  'https://note.com/ochyai/rss'\n];\n\n// 重複URLを除去してフィードごとに1アイテムを出力\nconst seen = new Set();\nconst output = [];\nfor (const url of feeds) {\n  if (seen.has(url)) continue;\n  seen.add(url);\n  output.push({ json: { feedUrl: url } });\n}\nreturn output;"
+      },
+      "id": "2",
+      "name": "Build Feed List",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        460,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "url": "={{$json.feedUrl}}",
+        "options": {
+          "ignoreSSLIssues": false
+        }
+      },
+      "id": "3",
+      "name": "Read RSS",
+      "type": "n8n-nodes-base.rssFeedRead",
+      "typeVersion": 1.1,
+      "position": [
+        700,
+        300
+      ],
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "jsCode": "const toJstDate = (d) => new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Tokyo', year: 'numeric', month: '2-digit', day: '2-digit' }).format(d);\n\nconst now = new Date();\nconst [year, month, day] = toJstDate(now).split('-').map(Number);\nconst todayJstUtc = new Date(Date.UTC(year, month - 1, day));\ntodayJstUtc.setUTCDate(todayJstUtc.getUTCDate() - 1);\nconst yesterdayStr = toJstDate(todayJstUtc);\n\nconst output = [];\nfor (const item of items) {\n  const j = item.json || {};\n  const candidateDate = j.isoDate || j.pubDate || j.published || j.updated || j['dc:date'];\n  if (!candidateDate) continue;\n\n  const dateObj = new Date(candidateDate);\n  if (Number.isNaN(dateObj.getTime())) continue;\n\n  const updatedDateStr = toJstDate(dateObj);\n  if (updatedDateStr !== yesterdayStr) continue;\n\n  const author = j.creator || j.author || j['dc:creator'] || (j.meta && j.meta.title) || '';\n  const body = j['content:encoded'] || j.content || j.contentSnippet || j.description || '';\n\n  output.push({\n    json: {\n      title: j.title || '',\n      link: j.link || j.guid || '',\n      author,\n      updatedDateJst: updatedDateStr,\n      body\n    }\n  });\n}\n\nreturn output;"
+      },
+      "id": "4",
+      "name": "Filter Yesterday (JST)",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        940,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "name": "ollamaPrompt",
+              "value": "=あなたは優秀な日本語の要約アシスタントです。以下のnote記事を、要点を落とさず丁寧に日本語で3〜5個の箇条書きで要約してください。誘導・憶測は避け、本文に書かれている内容のみを用いてください。出力は要約本文のみとし、前置きは不要です。\\n\\nタイトル: {{$json.title}}\\n著者: {{$json.author}}\\nURL: {{$json.link}}\\n更新日(JST): {{$json.updatedDateJst}}\\n本文:\\n{{$json.body}}",
+              "type": "string"
+            },
+            {
+              "name": "articleTitle",
+              "value": "={{$json.title}}",
+              "type": "string"
+            },
+            {
+              "name": "articleUrl",
+              "value": "={{$json.link}}",
+              "type": "string"
+            },
+            {
+              "name": "articleAuthor",
+              "value": "={{$json.author}}",
+              "type": "string"
+            },
+            {
+              "name": "updatedDateJst",
+              "value": "={{$json.updatedDateJst}}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "5",
+      "name": "Build Prompt",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1180,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://127.0.0.1:11434/api/generate",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"model\": \"gemma4:26b\",\n  \"prompt\": $json.ollamaPrompt,\n  \"stream\": false,\n  \"options\": {\n    \"temperature\": 0.3\n  }\n}",
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          },
+          "timeout": 300000
+        }
+      },
+      "id": "6",
+      "name": "Summarize with Gemma",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1420,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "resource": "databasePage",
+        "operation": "create",
+        "databaseId": "YOUR_NOTION_DATABASE_ID",
+        "title": "={{$node['Build Prompt'].json['articleTitle']}}",
+        "propertiesUi": {
+          "propertyValues": [
+            {
+              "key": "URL|url",
+              "urlValue": "={{$node['Build Prompt'].json['articleUrl']}}"
+            },
+            {
+              "key": "UpdatedDate|date",
+              "dateValue": "={{$node['Build Prompt'].json['updatedDateJst']}}"
+            },
+            {
+              "key": "Summary|rich_text",
+              "textContent": "={{$json.response}}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "7",
+      "name": "Save to Notion",
+      "type": "n8n-nodes-base.notion",
+      "typeVersion": 2.2,
+      "position": [
+        1660,
+        300
+      ],
+      "credentials": {
+        "notionApi": {
+          "id": "YOUR_NOTION_CREDENTIAL_ID",
+          "name": "Notion account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Daily 06:00 JST": {
+      "main": [
+        [
+          {
+            "node": "Build Feed List",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build Feed List": {
+      "main": [
+        [
+          {
+            "node": "Read RSS",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read RSS": {
+      "main": [
+        [
+          {
+            "node": "Filter Yesterday (JST)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter Yesterday (JST)": {
+      "main": [
+        [
+          {
+            "node": "Build Prompt",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build Prompt": {
+      "main": [
+        [
+          {
+            "node": "Summarize with Gemma",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Summarize with Gemma": {
+      "main": [
+        [
+          {
+            "node": "Save to Notion",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "2",
+  "meta": {
+    "instanceId": "generated-by-claude"
+  },
+  "id": "daily-note-digest-gemma"
+}
