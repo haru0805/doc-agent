@@ -10,59 +10,69 @@
               "expression": "0 6 * * *"
             }
           ]
-        },
-        "timezone": "Asia/Tokyo"
+        }
       },
-      "id": "1",
+      "id": "f4c498c3-9d00-4add-82ac-350e5ec77faf",
       "name": "Daily 06:00 JST",
       "type": "n8n-nodes-base.scheduleTrigger",
       "typeVersion": 1.2,
       "position": [
-        220,
-        300
+        0,
+        0
       ]
     },
     {
       "parameters": {
-        "jsCode": "const feeds = [\n  'https://note.com/kenichiota0711/rss',\n  'https://note.com/1105shimada/rss',\n  'https://note.com/polipoli_info/rss',\n  'https://note.com/hal_sk/rss',\n  'https://note.com/takashi_asa_wip/rss',\n  'https://note.com/jun0322/rss',\n  'https://note.com/inokun/rss',\n  'https://note.com/mosarinko/rss',\n  'https://note.com/miz_kushida/rss',\n  'https://note.com/yumaevo/rss',\n  'https://note.com/kenichiro_hara/rss',\n  'https://note.com/riku0423/rss',\n  'https://note.com/testosterone/rss',\n  'https://note.com/usakurai/rss',\n  'https://note.com/yamotty_note/rss',\n  'https://note.com/djkei0514/rss',\n  'https://note.com/annotakahiro24/rss',\n  'https://note.com/takahiroanno/rss',\n  'https://note.com/taiga_pkr/rss',\n  'https://note.com/777pee/rss',\n  'https://note.com/goole/rss',\n  'https://note.com/saydo/rss',\n  'https://note.com/mamoru_tsuchiya/rss',\n  'https://note.com/kan_hatakeyama/rss',\n  'https://note.com/npaka/rss',\n  'https://note.com/mmiya/rss',\n  'https://note.com/ihara/rss',\n  'https://note.com/digital_jpn_gc/rss',\n  'https://note.com/digital_jpn/rss',\n  'https://note.com/hik0107/rss',\n  'https://note.com/kouzoukaikaku/rss',\n  'https://note.com/simplearchitect/rss',\n  'https://note.com/gooddesignaward/rss',\n  'https://note.com/coffeee_student/rss',\n  'https://note.com/currypurin/rss',\n  'https://note.com/wakusei2nd/rss',\n  'https://note.com/keihigu/rss',\n  'https://note.com/vcca/rss',\n  'https://note.com/takenokosuzuki/rss',\n  'https://note.com/carpediem_/rss',\n  'https://note.com/dohijun/rss',\n  'https://note.com/copywriterseyes/rss',\n  'https://note.com/ai_1124at/rss',\n  'https://note.com/mcz9mm/rss',\n  'https://note.com/lifeisbeautiful/rss',\n  'https://note.com/ochyai/rss'\n];\n\n// 重複URLを除去してフィードごとに1アイテムを出力\nconst seen = new Set();\nconst output = [];\nfor (const url of feeds) {\n  if (seen.has(url)) continue;\n  seen.add(url);\n  output.push({ json: { feedUrl: url } });\n}\nreturn output;"
+        "jsCode": "// 各フィードの url と tags を定義する。tags の話題タグは推測で付与しているため必要に応じてここで編集する。\n// 有効なタグ（Notion のマルチセレクト既存値）: note / GovTech東京 / PdM / 政府 / デジ庁 / メルマガ / PM\n// 基本タグは 'note'。それ以外の話題タグは推測なので誤りがあれば修正すること。\nconst feeds = [\n  { url: 'https://note.com/kenichiota0711/rss', tags: ['note'] },\n  { url: 'https://note.com/1105shimada/rss', tags: ['note'] },\n  { url: 'https://note.com/polipoli_info/rss', tags: ['note', '政府'] },\n  { url: 'https://note.com/hal_sk/rss', tags: ['note', 'GovTech東京', '政府'] },\n  { url: 'https://note.com/takashi_asa_wip/rss', tags: ['note'] },\n  { url: 'https://note.com/jun0322/rss', tags: ['note'] },\n  { url: 'https://note.com/inokun/rss', tags: ['note'] },\n  { url: 'https://note.com/mosarinko/rss', tags: ['note'] },\n  { url: 'https://note.com/miz_kushida/rss', tags: ['note'] },\n  { url: 'https://note.com/yumaevo/rss', tags: ['note'] },\n  { url: 'https://note.com/kenichiro_hara/rss', tags: ['note'] },\n  { url: 'https://note.com/riku0423/rss', tags: ['note'] },\n  { url: 'https://note.com/testosterone/rss', tags: ['note'] },\n  { url: 'https://note.com/usakurai/rss', tags: ['note'] },\n  { url: 'https://note.com/yamotty_note/rss', tags: ['note', 'PdM'] },\n  { url: 'https://note.com/djkei0514/rss', tags: ['note'] },\n  { url: 'https://note.com/annotakahiro24/rss', tags: ['note', 'GovTech東京', '政府'] },\n  { url: 'https://note.com/takahiroanno/rss', tags: ['note', 'GovTech東京', '政府'] },\n  { url: 'https://note.com/taiga_pkr/rss', tags: ['note'] },\n  { url: 'https://note.com/777pee/rss', tags: ['note'] },\n  { url: 'https://note.com/goole/rss', tags: ['note'] },\n  { url: 'https://note.com/saydo/rss', tags: ['note'] },\n  { url: 'https://note.com/mamoru_tsuchiya/rss', tags: ['note'] },\n  { url: 'https://note.com/kan_hatakeyama/rss', tags: ['note'] },\n  { url: 'https://note.com/npaka/rss', tags: ['note'] },\n  { url: 'https://note.com/mmiya/rss', tags: ['note'] },\n  { url: 'https://note.com/ihara/rss', tags: ['note'] },\n  { url: 'https://note.com/digital_jpn_gc/rss', tags: ['note', 'デジ庁', '政府'] },\n  { url: 'https://note.com/digital_jpn/rss', tags: ['note', 'デジ庁', '政府'] },\n  { url: 'https://note.com/hik0107/rss', tags: ['note', 'PdM'] },\n  { url: 'https://note.com/kouzoukaikaku/rss', tags: ['note', '政府'] },\n  { url: 'https://note.com/simplearchitect/rss', tags: ['note'] },\n  { url: 'https://note.com/gooddesignaward/rss', tags: ['note'] },\n  { url: 'https://note.com/coffeee_student/rss', tags: ['note'] },\n  { url: 'https://note.com/currypurin/rss', tags: ['note'] },\n  { url: 'https://note.com/wakusei2nd/rss', tags: ['note', 'メルマガ'] },\n  { url: 'https://note.com/keihigu/rss', tags: ['note'] },\n  { url: 'https://note.com/vcca/rss', tags: ['note'] },\n  { url: 'https://note.com/takenokosuzuki/rss', tags: ['note'] },\n  { url: 'https://note.com/carpediem_/rss', tags: ['note'] },\n  { url: 'https://note.com/dohijun/rss', tags: ['note'] },\n  { url: 'https://note.com/copywriterseyes/rss', tags: ['note'] },\n  { url: 'https://note.com/ai_1124at/rss', tags: ['note'] },\n  { url: 'https://note.com/mcz9mm/rss', tags: ['note'] },\n  { url: 'https://note.com/lifeisbeautiful/rss', tags: ['note', 'メルマガ'] },\n  { url: 'https://note.com/ochyai/rss', tags: ['note'] },\n  { url: 'https://note.com/kyosu_ke/rss', tags: ['note'] },\n  { url: 'https://note.com/k__2nema2/rss', tags: ['note'] },\n  { url: 'https://note.com/koushikagawa/rss', tags: ['note'] },\n  { url: 'https://note.com/ready_harte7593/rss', tags: ['note'] },\n  { url: 'https://note.com/photograpy_tips/rss', tags: ['note'] },\n  { url: 'https://irnote.com/rss', tags: ['note'] },\n  { url: 'https://note.com/hayakawagomi/rss', tags: ['note'] },\n  { url: 'https://note.com/mnbtauchi/rss', tags: ['note'] },\n  { url: 'https://note.com/goto_finance/rss', tags: ['note', 'メルマガ'] },\n  { url: 'https://note.com/fladdict/rss', tags: ['note', 'PdM'] },\n  { url: 'https://note.com/fuuuuuta21/rss', tags: ['note'] },\n  { url: 'https://note.com/shu_yamaguchi/rss', tags: ['note'] },\n  { url: 'https://note.layerx.co.jp/rss', tags: ['note', 'PdM'] },\n  { url: 'https://note.com/kanazawa_you/rss', tags: ['note'] },\n  { url: 'https://note.com/gimupop/rss', tags: ['note'] },\n  { url: 'https://note.com/suh_sunaneko/m/m088a94ee1372/rss', tags: ['note', 'メルマガ'] },\n  { url: 'https://note.com/sansanjapan/m/m6bdd1e49f7fa/rss', tags: ['note', 'PdM'] },\n  { url: 'https://note.com/hashtag/PdM/rss', tags: ['note', 'PdM'] },\n  { url: 'https://note.com/hashtag/%E3%83%97%E3%83%AD%E3%83%80%E3%82%AF%E3%83%88%E3%83%9E%E3%83%8D%E3%82%B8%E3%83%A1%E3%83%B3%E3%83%88/rss', tags: ['note', 'PdM'] },\n  // --- Qiita / Zenn（ソースタグ Qiita / Zenn ＋ 話題タグ PdM / PM）---\n  { url: 'https://qiita.com/tags/pdm/feed.atom', tags: ['Qiita', 'PdM'] },\n  { url: 'https://qiita.com/tags/%E3%83%97%E3%83%AD%E3%82%B8%E3%82%A7%E3%82%AF%E3%83%88%E7%AE%A1%E7%90%86/feed.atom', tags: ['Qiita', 'PM'] },\n  { url: 'https://qiita.com/tags/pm/feed.atom', tags: ['Qiita', 'PM'] },\n  { url: 'https://zenn.dev/topics/pm/feed', tags: ['Zenn', 'PM'] },\n  { url: 'https://zenn.dev/topics/pdm/feed', tags: ['Zenn', 'PdM'] },\n  { url: 'https://zenn.dev/topics/%E3%83%97%E3%83%AD%E3%83%80%E3%82%AF%E3%83%88%E3%83%9E%E3%83%8D%E3%82%B8%E3%83%A1%E3%83%B3%E3%83%88/feed', tags: ['Zenn', 'PdM'] },\n  { url: 'https://zenn.dev/topics/%E3%83%97%E3%83%AD%E3%82%B8%E3%82%A7%E3%82%AF%E3%83%88%E3%83%9E%E3%83%8D%E3%82%B8%E3%83%A1%E3%83%B3%E3%83%88/feed', tags: ['Zenn', 'PM'] },\n  { url: 'https://qiita.com/popular-items/feed.atom', tags: ['Qiita'] },\n  { url: 'https://zenn.dev/feed', tags: ['Zenn'] }\n];\n\n// 重複URLを除去してフィードごとに1アイテムを出力\nconst seen = new Set();\nconst output = [];\nfor (const feed of feeds) {\n  if (seen.has(feed.url)) continue;\n  seen.add(feed.url);\n  output.push({ json: { feedUrl: feed.url, tags: feed.tags } });\n}\nreturn output;"
       },
-      "id": "2",
+      "id": "146a26dd-afff-4075-b985-f837839e30b5",
       "name": "Build Feed List",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        460,
-        300
+        240,
+        0
       ]
     },
     {
       "parameters": {
         "url": "={{$json.feedUrl}}",
-        "options": {
-          "ignoreSSLIssues": false
-        }
+        "options": {}
       },
-      "id": "3",
+      "id": "8f93e42b-7f7e-497d-9621-fdb9b75b18f9",
       "name": "Read RSS",
       "type": "n8n-nodes-base.rssFeedRead",
       "typeVersion": 1.1,
       "position": [
-        700,
-        300
+        480,
+        0
       ],
       "onError": "continueRegularOutput"
     },
     {
       "parameters": {
-        "jsCode": "const toJstDate = (d) => new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Tokyo', year: 'numeric', month: '2-digit', day: '2-digit' }).format(d);\n\nconst now = new Date();\nconst [year, month, day] = toJstDate(now).split('-').map(Number);\nconst todayJstUtc = new Date(Date.UTC(year, month - 1, day));\ntodayJstUtc.setUTCDate(todayJstUtc.getUTCDate() - 1);\nconst yesterdayStr = toJstDate(todayJstUtc);\n\nconst output = [];\nfor (const item of items) {\n  const j = item.json || {};\n  const candidateDate = j.isoDate || j.pubDate || j.published || j.updated || j['dc:date'];\n  if (!candidateDate) continue;\n\n  const dateObj = new Date(candidateDate);\n  if (Number.isNaN(dateObj.getTime())) continue;\n\n  const updatedDateStr = toJstDate(dateObj);\n  if (updatedDateStr !== yesterdayStr) continue;\n\n  const author = j.creator || j.author || j['dc:creator'] || (j.meta && j.meta.title) || '';\n  const body = j['content:encoded'] || j.content || j.contentSnippet || j.description || '';\n\n  output.push({\n    json: {\n      title: j.title || '',\n      link: j.link || j.guid || '',\n      author,\n      updatedDateJst: updatedDateStr,\n      body\n    }\n  });\n}\n\nreturn output;"
+        "jsCode": "const toJstDate = (d) => new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Tokyo', year: 'numeric', month: '2-digit', day: '2-digit' }).format(d);\n\nconst now = new Date();\nconst [year, month, day] = toJstDate(now).split('-').map(Number);\nconst todayJstUtc = new Date(Date.UTC(year, month - 1, day));\ntodayJstUtc.setUTCDate(todayJstUtc.getUTCDate() - 1);\nconst yesterdayStr = toJstDate(todayJstUtc);\n\n// 各RSSアイテムが由来するフィード（Build Feed List）を pairedItem から特定し tags を引き当てる\nconst feeds = $('Build Feed List').all();\nconst getFeedIdx = (pi) => {\n  if (pi === null || pi === undefined) return 0;\n  if (typeof pi === 'number') return pi;\n  if (Array.isArray(pi)) return getFeedIdx(pi[0]);\n  if (typeof pi === 'object') return pi.item != null ? pi.item : 0;\n  return 0;\n};\n\nconst output = [];\nfor (let i = 0; i < items.length; i++) {\n  const item = items[i];\n  const j = item.json || {};\n  const candidateDate = j.isoDate || j.pubDate || j.published || j.updated || j['dc:date'];\n  if (!candidateDate) continue;\n\n  const dateObj = new Date(candidateDate);\n  if (Number.isNaN(dateObj.getTime())) continue;\n\n  const updatedDateStr = toJstDate(dateObj);\n  if (updatedDateStr !== yesterdayStr) continue;\n\n  const author = j.creator || j.author || j['dc:creator'] || (j.meta && j.meta.title) || '';\n  const body = j['content:encoded'] || j.content || j.contentSnippet || j.description || '';\n\n  const feedIdx = getFeedIdx(item.pairedItem);\n  const feed = feeds[feedIdx];\n  const tags = (feed && feed.json && Array.isArray(feed.json.tags) && feed.json.tags.length) ? feed.json.tags : ['note'];\n\n  output.push({\n    json: {\n      title: j.title || '',\n      link: j.link || j.guid || '',\n      author,\n      updatedDateJst: updatedDateStr,\n      body,\n      tags\n    },\n    pairedItem: { item: i }\n  });\n}\n\nreturn output;"
       },
-      "id": "4",
+      "id": "397e4005-6673-4a5c-9d22-87661f4f0de8",
       "name": "Filter Yesterday (JST)",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        940,
-        300
+        720,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// URL単位で重複を排除し、複数フィードで検出された同一記事のタグを統合する\nconst byLink = new Map();\nconst output = [];\nfor (const item of items) {\n  const j = item.json || {};\n  const link = j.link || '';\n  const tags = Array.isArray(j.tags) ? j.tags : [];\n  if (!link) {\n    // link が無い場合は重複判定できないためそのまま通す\n    output.push({ json: { ...j, tags: tags.slice() } });\n    continue;\n  }\n  if (byLink.has(link)) {\n    const exj = byLink.get(link).json;\n    for (const t of tags) {\n      if (!exj.tags.includes(t)) exj.tags.push(t);\n    }\n    // より情報量の多い本文を採用\n    if ((j.body || '').length > (exj.body || '').length) exj.body = j.body;\n  } else {\n    const entry = { json: { ...j, tags: tags.slice() } };\n    byLink.set(link, entry);\n    output.push(entry);\n  }\n}\nreturn output;"
+      },
+      "id": "b2e6c4a1-1f3d-4a77-9c2e-7d5e0a1b2c3d",
+      "name": "Deduplicate by URL",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        840,
+        0
       ]
     },
     {
@@ -93,18 +103,23 @@
               "name": "updatedDateJst",
               "value": "={{$json.updatedDateJst}}",
               "type": "string"
+            },
+            {
+              "name": "tags",
+              "value": "={{$json.tags}}",
+              "type": "array"
             }
           ]
         },
         "options": {}
       },
-      "id": "5",
+      "id": "d1977412-9648-4d56-8fc2-24e901292e96",
       "name": "Build Prompt",
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        1180,
-        300
+        960,
+        0
       ]
     },
     {
@@ -113,7 +128,7 @@
         "url": "http://127.0.0.1:11434/api/generate",
         "sendBody": true,
         "specifyBody": "json",
-        "jsonBody": "={\n  \"model\": \"gemma4:26b\",\n  \"prompt\": $json.ollamaPrompt,\n  \"stream\": false,\n  \"options\": {\n    \"temperature\": 0.3\n  }\n}",
+        "jsonBody": "={{ JSON.stringify({ model: \"gemma4:26b\", prompt: $json.ollamaPrompt, stream: false, options: { temperature: 0.3 } }) }}",
         "options": {
           "response": {
             "response": {
@@ -123,50 +138,60 @@
           "timeout": 300000
         }
       },
-      "id": "6",
+      "id": "47138f2f-4b0e-4bfa-8301-648f07d781ad",
       "name": "Summarize with Gemma",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
       "position": [
-        1420,
-        300
+        1200,
+        0
       ]
     },
     {
       "parameters": {
         "resource": "databasePage",
-        "operation": "create",
-        "databaseId": "YOUR_NOTION_DATABASE_ID",
+        "databaseId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "30888d5b50fb80a08c62d3e3551a889e",
+          "__regex": "^([0-9a-f]{8}-?[0-9a-f]{4}-?[0-9a-f]{4}-?[0-9a-f]{4}-?[0-9a-f]{12})"
+        },
         "title": "={{$node['Build Prompt'].json['articleTitle']}}",
         "propertiesUi": {
           "propertyValues": [
             {
-              "key": "URL|url",
+              "key": "リンク|url",
               "urlValue": "={{$node['Build Prompt'].json['articleUrl']}}"
             },
             {
-              "key": "UpdatedDate|date",
-              "dateValue": "={{$node['Build Prompt'].json['updatedDateJst']}}"
+              "key": "日付|date",
+              "includeTime": false,
+              "date": "={{ $now.setZone('Asia/Tokyo').toFormat('yyyy-MM-dd') }}",
+              "timezone": "Japan"
             },
             {
-              "key": "Summary|rich_text",
+              "key": "要約|rich_text",
               "textContent": "={{$json.response}}"
+            },
+            {
+              "key": "タグ|multi_select",
+              "multiSelectValue": "={{ $node['Build Prompt'].json['tags'] }}"
             }
           ]
         },
         "options": {}
       },
-      "id": "7",
+      "id": "438a4422-454a-46f9-b225-c83807646efe",
       "name": "Save to Notion",
       "type": "n8n-nodes-base.notion",
       "typeVersion": 2.2,
       "position": [
-        1660,
-        300
+        1440,
+        0
       ],
       "credentials": {
         "notionApi": {
-          "id": "YOUR_NOTION_CREDENTIAL_ID",
+          "id": "VA5U8XSyIQcIoAvL",
           "name": "Notion account"
         }
       }
@@ -211,6 +236,17 @@
       "main": [
         [
           {
+            "node": "Deduplicate by URL",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Deduplicate by URL": {
+      "main": [
+        [
+          {
             "node": "Build Prompt",
             "type": "main",
             "index": 0
@@ -241,13 +277,18 @@
       ]
     }
   },
-  "active": false,
+  "active": true,
   "settings": {
-    "executionOrder": "v1"
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
   },
-  "versionId": "2",
+  "versionId": "b5459dfe-86c6-4dde-a863-9a49edd7841f",
   "meta": {
-    "instanceId": "generated-by-claude"
+    "templateCredsSetupCompleted": true,
+    "instanceId": "092a16a6a18e9ea03625f7abc99714e84a31a3df0bb184e1fe719b819643bd29"
   },
-  "id": "daily-note-digest-gemma"
+  "nodeGroups": [],
+  "id": "NyNEGjvuGYxV8y8Z",
+  "tags": []
 }

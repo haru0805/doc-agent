@@ -1,0 +1,17 @@
+services:
+  n8n:
+    image: n8nio/n8n:latest
+    restart: unless-stopped
+    ports:
+      - "5678:5678"
+    environment:
+      - GENERIC_TIMEZONE=Asia/Tokyo      # Cronの06:00 JSTを正しく動かすため必須
+      - TZ=Asia/Tokyo
+      - N8N_SECURE_COOKIE=false           # http://localhost アクセス用
+    volumes:
+      - n8n_data:/home/node/.n8n          # ワークフロー・認証情報を永続化
+    extra_hosts:
+      - "host.docker.internal:host-gateway"  # コンテナからホストのOllamaへ到達可能に
+
+volumes:
+  n8n_data:
